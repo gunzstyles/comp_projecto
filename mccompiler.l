@@ -1,9 +1,16 @@
 
 lettersSmall= [a-z]+
 lettersBig= [A-Z]+
-numbers = [0-9]+
+numbers = [0-9]*
+limited_numbers = [0-7]
+
+%%
     
 id = {"_" | lettersBig | lettersSmall} {"_" | lettersBig | lettersSmall | numbers}* {printf("ID\n");}
+
+{numbers}        {printf("INTLIT(%s)\n", yytext);}
+
+
 "&"               {printf("AMP\n");}
 "&&"              {printf("AND\n");}
 "="               {printf("ASSIGN\n");}
@@ -34,6 +41,7 @@ id = {"_" | lettersBig | lettersSmall} {"_" | lettersBig | lettersSmall | number
 "+"               {printf("PLUS\n");}
 "}"               {printf("RBRACE\n");}
 "return"          {printf("RETURN\n");}
+")"               {printf("RPAR\n");}
  
 "]"               {printf("RSQ\n");}
  
