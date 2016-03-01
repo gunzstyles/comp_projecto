@@ -1,19 +1,4 @@
 %%
-AMP = "&" AND = "&&" ASSIGN = "=" AST = "*" CHAR = char COMMA = "," DIV = "/" ELSE = else EQ = "==" FOR = for
-GE = ">="
-GT = ">"
-IF = if
-INT = int LBRACE = "{" LE = "<=" LPAR = "(" LSQ = "["
-LT = "<"
-MINUS = "-" MOD = "%"
-NE = "!="
-NOT = "!"
-OR = "||"
-PLUS = "+" RBRACE = "}" RETURN = return RPAR = ")"
-RSQ = "]"
-SEMI = ";"
-%%
-    
 "&"               {printf("AMP\n");}
 "&&"              {printf("AND\n");}
 "="               {printf("ASSIGN\n");}
@@ -48,6 +33,10 @@ SEMI = ";"
 "]"               {printf("RSQ\n");}
  
 ";"               {printf("SEMI\n");}
+"void"            {printf("VOID\n");}
+
+"while"|"++"|"--"|"auto"|"break"|"case"|"const"|"continue"|"default"|"do"|"long"|"register"|"short"|"signed"|"sizeof"|"static"|"struct"|"switch"|"typedef"|"union"|"unsigned"|"volatile"|"double"|"enum"|"extern"|"float"|"goto" {printf("RESERVED\n");}
+
 
 %%
 int main(){
