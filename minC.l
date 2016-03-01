@@ -1,4 +1,9 @@
-%%
+
+lettersSmall= [a-z]+
+lettersBig= [A-Z]+
+numbers = [0-9]+
+    
+id = {"_" | lettersBig | lettersSmall} {"_" | lettersBig | lettersSmall | numbers}* {printf("ID\n");}
 "&"               {printf("AMP\n");}
 "&&"              {printf("AND\n");}
 "="               {printf("ASSIGN\n");}
