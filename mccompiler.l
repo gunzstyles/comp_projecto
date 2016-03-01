@@ -1,15 +1,9 @@
-
-lettersSmall= [a-z]+
-lettersBig= [A-Z]+
-numbers = [0-9]*
-limited_numbers = [0-7]
+lettersSmall[a-z]
+lettersBig[A-Z]
+numbers[0-9]
+limited_numbers[0-7]
 
 %%
-    
-id = {"_" | lettersBig | lettersSmall} {"_" | lettersBig | lettersSmall | numbers}* {printf("ID\n");}
-
-{numbers}        {printf("INTLIT(%s)\n", yytext);}
-
 
 "&"               {printf("AMP\n");}
 "&&"              {printf("AND\n");}
@@ -47,10 +41,19 @@ id = {"_" | lettersBig | lettersSmall} {"_" | lettersBig | lettersSmall | number
  
 ";"               {printf("SEMI\n");}
 "void"            {printf("VOID\n");}
+\n                
+" "               
+\t                
 
-"while"|"++"|"--"|"auto"|"break"|"case"|"const"|"continue"|"default"|"do"|"long"|"register"|"short"|"signed"|"sizeof"|"static"|"struct"|"switch"|"typedef"|"union"|"unsigned"|"volatile"|"double"|"enum"|"extern"|"float"|"goto" {printf("RESERVED\n");}
 
+"while"|"++"|"--"|"auto"|"break"|"case"|"const"|"continue"|"default"|"do"|"long"|"register"|"short"|"signed"|"sizeof"|"static"|"struct"|"switch"|"typedef"|"union"|"unsigned"|"volatile"|"double"|"enum"|"extern"|"float"|"goto"                                                                {printf("RESERVED(%s)\n", yytext);}
 
+    
+("_"|{lettersSmall}|{lettersBig})("_"|{lettersSmall}|{lettersBig}|{numbers})*                                   {printf("ID(%s)\n", yytext);}
+{numbers}+                                                                                                      {printf("INTLIT(%s)\n", yytext);}
+"\'"{numbers}|{lettersSmall}|{lettersBig}|"\\n"|"\\t"|"\\\\"|"\\\'"|"\\\""|("\\"{limited_numbers}{1,3})"\'"     {printf("CHRLIT(%s)\n", yytext);}
+
+    
 %%
 int main(){
 
