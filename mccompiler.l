@@ -3,81 +3,98 @@
 %x COMMENT
 
 %{
-  #include <string.h>
-  #include <stdlib.h>
-  #include <stdio.h>
-
-  int n_line;
+  int n_line = 1;
   int n_column = 1;
+  int flag = 0;
+  int comment_line;
+  int comment_column;
 %}
 
-lettersSmall[a-z]
-lettersBig[A-Z]
+letters[a-zA-Z]
 numbers[0-9]
 limited_numbers[0-7]
+sequencia_escape \\n|\\t|\\\\|\\\'|\\\"|(\\{limited_numbers}{limited_numbers}?{limited_numbers}?)
 
-CHRLIT            \'([a-zA-Z]|\\n|\\t|\\\\|\\\'|\\\"|\\({limited_numbers}{1,3})|.)\'
-STRLIT            \"([a-zA-Z]|{numbers}|\\n|\\t|\\\\|\\\'|\\\"|\\({limited_numbers}{1,3})|.)*\"
-ID                ("_"|{lettersSmall}|{lettersBig})("_"|{lettersSmall}|{lettersBig}|{numbers})* 
+ID                ("_"|{letters})("_"|{letters}|{numbers})* 
 
 %%
-"/*"              {BEGIN COMMENT; n_line=yylineno; n_column-=yyleng;}
-<COMMENT>"*/"     {BEGIN 0;}
+
+"&"               {if(flag==1)printf("AMP\n");n_column+=yyleng;}
+"&&"              {if(flag==1)printf("AND\n");n_column+=yyleng;}
+"="               {if(flag==1)printf("ASSIGN\n");n_column+=yyleng;}
+"*"               {if(flag==1)printf("AST\n");n_column+=yyleng;}
+"char"            {if(flag==1)printf("CHAR\n");n_column+=yyleng;}
+","               {if(flag==1)printf("COMMA\n");n_column+=yyleng;}
+"/"               {if(flag==1)printf("DIV\n");n_column+=yyleng;}
+"else"            {if(flag==1)printf("ELSE\n");n_column+=yyleng;}
+"=="              {if(flag==1)printf("EQ\n");n_column+=yyleng;}
+"for"             {if(flag==1)printf("FOR\n");n_column+=yyleng;}  
+
+">="              {if(flag==1)printf("GE\n");n_column+=yyleng;}
+">"               {if(flag==1)printf("GT\n");n_column+=yyleng;}
+"if"              {if(flag==1)printf("IF\n");n_column+=yyleng;}
+"int"             {if(flag==1)printf("INT\n");n_column+=yyleng;}
+"{"               {if(flag==1)printf("LBRACE\n");n_column+=yyleng;}
+"<="              {if(flag==1)printf("LE\n");n_column+=yyleng;}
+"("               {if(flag==1)printf("LPAR\n");n_column+=yyleng;}
+"["               {if(flag==1)printf("LSQ\n");n_column+=yyleng;}
+ 
+"<"               {if(flag==1)printf("LT\n");n_column+=yyleng;}
+ 
+"-"               {if(flag==1)printf("MINUS\n");n_column+=yyleng;}
+"%"               {if(flag==1)printf("MOD\n");n_column+=yyleng;}
+ 
+"!="              {if(flag==1)printf("NE\n");n_column+=yyleng;}
+"!"               {if(flag==1)printf("NOT\n");n_column+=yyleng;}
+"||"              {if(flag==1)printf("OR\n");n_column+=yyleng;}
+"+"               {if(flag==1)printf("PLUS\n");n_column+=yyleng;}
+"}"               {if(flag==1)printf("RBRACE\n");n_column+=yyleng;}
+"return"          {if(flag==1)printf("RETURN\n");n_column+=yyleng;}
+")"               {if(flag==1)printf("RPAR\n");n_column+=yyleng;}
+ 
+"]"               {if(flag==1)printf("RSQ\n");n_column+=yyleng;}
+ 
+";"               {if(flag==1)printf("SEMI\n");n_column+=yyleng;}
+"void"            {if(flag==1)printf("VOID\n");n_column+=yyleng;}
+\n                {n_column=1; n_line+=1;}
+\t                {n_column+=yyleng;}
+" "               {n_column+=1;}
+
+
+"while"|"++"|"--"|"auto"|"break"|"case"|"const"|"continue"|"default"|"do"|"long"|"register"|"short"|"signed"|"sizeof"|"static"|"struct"|"switch"|"typedef"|"union"|"unsigned"|"volatile"|"double"|"enum"|"extern"|"float"|"goto"         {if(flag==1)printf("RESERVED(%s)\n",yytext);n_column+=yyleng;}
+
+    
+"/*"              {BEGIN COMMENT;comment_line=yylineno;comment_column=n_column;n_column+=yyleng;}
+<COMMENT>"*/"     {BEGIN 0;n_column+=yyleng;}
+<COMMENT><<EOF>>  {printf("Line %d, col %d: unterminated comment\n",comment_line,comment_column);BEGIN 0;}
 <COMMENT>.        {n_column += yyleng;}
-<COMMENT>"\n"     {n_column = 1;}
-<COMMENT><<EOF>>  {printf("Line %d, col %d: untermined comment\n", n_line, n_column); BEGIN 0;}
-"&"               {printf("AMP\n");}
-"&&"              {printf("AND\n");}
-"="               {printf("ASSIGN\n");}
-"*"               {printf("AST\n");}
-"char"            {printf("CHAR\n");}
-","               {printf("COMMA\n");}
-"/"               {printf("DIV\n");}
-"else"            {printf("ELSE\n");}
-"for"             {printf("FOR\n");}  
-
-">="              {printf("GE\n");}
-">"               {printf("GT\n");}
-"if"              {printf("IF\n");}
-"int"             {printf("INT\n");}
-"{"               {printf("LBRACE\n");}
-"<="              {printf("LE\n");}
-"("               {printf("LPAR\n");}
-"["               {printf("LSQ\n");}
- 
-"<"               {printf("LT\n");}
- 
-"-"               {printf("MINUS\n");}
-"%"               {printf("MOD\n");}
- 
-"!="              {printf("NE\n");}
-"!"               {printf("NOT\n");}
-"||"              {printf("OR\n");}
-"+"               {printf("PLUS\n");}
-"}"               {printf("RBRACE\n");}
-"return"          {printf("RETURN\n");}
-")"               {printf("RPAR\n");}
- 
-"]"               {printf("RSQ\n");}
- 
-";"               {printf("SEMI\n");}
-"void"            {printf("VOID\n");}
-\n                {n_column=1;}
-" "               {n_line+=1;}
-\t                {n_line+=1;}
-
-
-"while"|"++"|"--"|"auto"|"break"|"case"|"const"|"continue"|"default"|"do"|"long"|"register"|"short"|"signed"|"sizeof"|"static"|"struct"|"switch"|"typedef"|"union"|"unsigned"|"volatile"|"double"|"enum"|"extern"|"float"|"goto"         {printf("RESERVED(%s)\n", yytext);}
+<COMMENT>"\n"     {n_line+=1;n_column =1;}
 
     
-{ID}              {printf("ID(%s)\n", yytext);}
-{numbers}+        {printf("INTLIT(%s)\n", yytext);}
-{CHRLIT}          {printf("CHRLIT(%s)\n",yytext);}
-{STRLIT}          {printf("STRLIT(%s)\n",yytext);}
+{ID}              {if(flag==1)printf("ID(%s)\n", yytext);n_column+=yyleng;}
+{numbers}+        {if(flag==1)printf("INTLIT(%s)\n", yytext);n_column+=yyleng;}
+
+
+\'({sequencia_escape}|[^\n\'])\'                               {if(flag==1)printf("CHRLIT(%s)\n",yytext);n_column+=yyleng;}
+\"({sequencia_escape}|[^\n\"])*\"                              {if(flag==1)printf("STRLIT(%s)\n",yytext);n_column+=yyleng;}
     
+\'([^\n\']*)     {printf("Line %d, col %d: unterminated char constant\n",n_line,n_column);n_column+=yyleng;}
+\"([^\n\"]*)     {printf("Line %d, col %d: unterminated string constant\n",n_line,n_column);n_column+=yyleng;}
+
+\'({sequencia_escape}|[^\n\'])*\'        {printf("Line %d, col %d: invalid char constant (%s)\n",n_line,n_column, yytext);n_column+=yyleng;}
+.                 {printf("Line %d, col %d: illegal character (%s)\n",n_line,n_column,yytext);n_column+=yyleng;}
+
+
+
+
 %%
-int main(){
-
+int main(int argv, char **argc){
+if(argv>1)
+{
+    if(strcmp(argc[1],"-l")==0){
+        flag = 1;
+    }
+}
 yylex();
 return 0;
 }

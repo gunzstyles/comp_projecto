@@ -1,11 +1,7 @@
-
-char buf[10];
+char buf[10]; 
      int main(int argc, char **argv) {
-          char autista = '\123';
-          puts("A resposta e:");
-  
-         grande teste
-         
+         '\8'
+          puts("A resposta e: \8");
           puts(itoa(1234, buf));
           return 0;
 }
