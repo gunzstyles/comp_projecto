@@ -16,8 +16,8 @@ limited_numbers[0-7]
 esc_sequence      \\n|\\t|\\\\|\\\'|\\\"|(\\{limited_numbers}{limited_numbers}?{limited_numbers}?)
 
 CHRLIT            \'([^\n\'\\]|{esc_sequence})\'
-UNTER_CHAR        \'([^\\\n\']|{esc_sequence}|\\)*
-INVALID_CHAR      \'(\\.|[^\n\'\\])*\'    
+UNTER_CHAR        \'([^\\\n\']|{esc_sequence})*\\*[^\n\']*
+INVALID_CHAR      \'(\\.|[^\\\'\n])*\'    
     
 STRLIT            \"([^\n\"\\]|{esc_sequence})*\"
 UNTER_STR         \"([^\n\"]|{esc_sequence}|(\"\\\"))*
