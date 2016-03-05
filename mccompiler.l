@@ -13,8 +13,15 @@
 letters[a-zA-Z]
 numbers[0-9]
 limited_numbers[0-7]
-sequencia_escape \\n|\\t|\\\\|\\\'|\\\"|(\\{limited_numbers}{limited_numbers}?{limited_numbers}?)
+esc_sequence      \\n|\\t|\\\\|\\\'|\\\"|(\\{limited_numbers}{limited_numbers}?{limited_numbers}?)
 
+CHRLIT            \'([^\n\'\\]|{esc_sequence})\'
+UNTER_CHAR        \'([^\\\n\']|{esc_sequence}|\\)*
+INVALID_CHAR      \'(\\.|[^\n\'\\])*\'    
+    
+STRLIT            \"([^\n\"\\]|{esc_sequence})*\"
+UNTER_STR         \"([^\n\"]|{esc_sequence}|(\"\\\"))*
+INVALID_STR       \"(\\.|[^\n\"\\])*\"   
 ID                ("_"|{letters})("_"|{letters}|{numbers})* 
 
 %%
@@ -70,27 +77,22 @@ ID                ("_"|{letters})("_"|{letters}|{numbers})*
 <COMMENT>.        {n_column += yyleng;}
 <COMMENT>"\n"     {n_line+=1;n_column =1;}
 
-    
 {ID}              {if(flag==1)printf("ID(%s)\n", yytext);n_column+=yyleng;}
 {numbers}+        {if(flag==1)printf("INTLIT(%s)\n", yytext);n_column+=yyleng;}
 
+{CHRLIT}          {if(flag==1)printf("CHRLIT(%s)\n",yytext);n_column+=yyleng;}
+{UNTER_CHAR}      {printf("Line %d, col %d: unterminated char constant\n",n_line,n_column);n_column+=yyleng;}
+{INVALID_CHAR}    {printf("Line %d, col %d: invalid char constant (%s)\n", n_line, n_column, yytext); n_column += yyleng;}
 
-\'({sequencia_escape}|[^\n\'])\'                               {if(flag==1)printf("CHRLIT(%s)\n",yytext);n_column+=yyleng;}
-\"({sequencia_escape}|[^\n\"])*\"                              {if(flag==1)printf("STRLIT(%s)\n",yytext);n_column+=yyleng;}
-    
-\'([^\n\']*)     {printf("Line %d, col %d: unterminated char constant\n",n_line,n_column);n_column+=yyleng;}
-\"([^\n\"]*)     {printf("Line %d, col %d: unterminated string constant\n",n_line,n_column);n_column+=yyleng;}
-
-\'({sequencia_escape}|[^\n\'])*\'        {printf("Line %d, col %d: invalid char constant (%s)\n",n_line,n_column, yytext);n_column+=yyleng;}
+{STRLIT}          {if(flag==1)printf("STRLIT(%s)\n",yytext);n_column+=yyleng;}
+{UNTER_STR}       {printf("Line %d, col %d: unterminated string constant\n", n_line, n_column); n_column += yyleng;}
+{INVALID_STR}     {printf("Line %d, col %d: invalid string constant (%s)\n", n_line, n_column,yytext); n_column += yyleng;}                   
 .                 {printf("Line %d, col %d: illegal character (%s)\n",n_line,n_column,yytext);n_column+=yyleng;}
-
-
 
 
 %%
 int main(int argv, char **argc){
-if(argv>1)
-{
+if(argv>1){
     if(strcmp(argc[1],"-l")==0){
         flag = 1;
     }
